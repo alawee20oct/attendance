@@ -499,8 +499,9 @@ else if ($input['api'] == 'load-user-plan') {
     // $date = $input['date'];
     $month = $input['month'];
     $year = $input['year'];
-    $half_date = $input['half_date'];
+    $week_prev_month = $input['week_prev_month'];
     $last_date = $input['last_date'];
+    $last_date_next_month = $input['last_date_next_month'];
     $prev_month = $input['prev_month'];
     $next_month = $input['next_month'];
     $prev_year = $input['prev_year'];
@@ -540,7 +541,7 @@ else if ($input['api'] == 'load-user-plan') {
         ON tb_plan.options = tb_options.options
         AND tb_plan.year = '$prev_year' 
         AND tb_plan.month = '$prev_month' 
-        AND tb_plan.date >= '$half_date' 
+        AND tb_plan.date >= '$week_prev_month' 
         ORDER BY tb_plan.datesave ASC"
     );
     while ($row = mysqli_fetch_array($sql_previous)) {
@@ -564,7 +565,7 @@ else if ($input['api'] == 'load-user-plan') {
         ON tb_plan.options = tb_options.options
         AND tb_plan.year = '$next_year' 
         AND tb_plan.month = '$next_month' 
-        AND tb_plan.date <= 15 
+        AND tb_plan.date <= '$last_date_next_month' 
         ORDER BY tb_plan.datesave ASC"
     );
     while ($row = mysqli_fetch_array($sql_next)) {
@@ -590,8 +591,9 @@ else if ($input['api'] == 'load-user-plan') {
 
 else if ($input['api'] == 'daily-result') {
     $last_date_current_month = $input['last_date_current_month'];
-    $half_date_prev_month = $input['half_date_prev_month'];
+    $week_prev_month = $input['week_prev_month'];
     $last_date_prev_month = $input['last_date_prev_month'];
+    $last_date_next_month = $input['last_date_next_month'];
     
     $current_month = $input['current_month'];
     $current_year = $input['current_year'];
@@ -627,7 +629,7 @@ else if ($input['api'] == 'daily-result') {
         );
     }
 
-    for ($i = $half_date_prev_month; $i <= $last_date_prev_month; $i++) {
+    for ($i = $week_prev_month; $i <= $last_date_prev_month; $i++) {
         $datesave = $prev_year."-".$prev_month."-".strval($i);
         $count_D = mysqli_query($connect, "SELECT tb_plan.*, tb_user.* FROM tb_plan INNER JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'D'");
         $count_N = mysqli_query($connect, "SELECT tb_plan.*, tb_user.* FROM tb_plan INNER JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'N'");
@@ -645,7 +647,7 @@ else if ($input['api'] == 'daily-result') {
         );
     }
 
-    for ($i = 1; $i <= 15; $i++) {
+    for ($i = 1; $i <= $last_date_next_month; $i++) {
         if ($i < 10) {
             $datesave = $next_year."-".$next_month."-0".strval($i);
         }
