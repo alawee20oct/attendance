@@ -154,7 +154,7 @@ session_start();
         </div>
     </div>
 
-    <div class="container mt-2 px-4 py-4">
+    <div class="mt-2 px-4 py-4">
         <div class="table-responsive text-nowrap position-relative overflow-auto vh-100">
             <table class="table table-hover table-sm table-borderless w-auto" id="day-table">
                 <thead class="text-center border-dark border-top border-bottom sticky-top">
@@ -272,8 +272,8 @@ session_start();
         var last_day_month = new Date(year, month, last_date_current_month).getDay();
 
         var last_date_prev_month = new Date(year, month, 0).getDate();
-        var half_date_prev_month = new Date(year, month, -14).getDate();
-        var half_date_next_month = new Date(year, month+1, 15).getDate();
+        var week_prev_month = new Date(year, month, -6).getDate();
+        var last_date_next_month = new Date(year, month+2, 0).getDate();
 
         var prev_month = new Date(year, month-1, 1).getMonth();
         var prev_year = new Date(year, month-1, 1).getFullYear();
@@ -283,8 +283,8 @@ session_start();
         var DATEsOBJECT = {
             'last_date_current_month': last_date_current_month,
             'last_date_prev_month': last_date_prev_month,
-            'half_date_prev_month': half_date_prev_month,
-            'half_date_next_month': half_date_next_month,
+            'week_prev_month': week_prev_month,
+            'last_date_next_month': last_date_next_month,
             'current_month': month,
             'current_year': year,
             'prev_month': prev_month,
@@ -300,7 +300,7 @@ session_start();
         date_thead += '<th valign="bottom" class="fw-semibold text-dark border-dark border-start border-end position-sticky top-0 bg-white">NICKNAME</th>';
         
         // load previous month ===============================================================================
-        for (var i = half_date_prev_month; i <= last_date_prev_month; i++) {
+        for (var i = week_prev_month; i <= last_date_prev_month; i++) {
             var date_fmt = dateFormat(i, "twodigit");
             var month_fmt = monthFormat(prev_month, "idx");
             var year_fmt = yearFormat(prev_year , "fourdigit");
@@ -335,7 +335,7 @@ session_start();
         //====================================================================================================
 
         // load next month ===================================================================================
-        for (var i = 1; i <= half_date_next_month; i++) {
+        for (var i = 1; i <= last_date_next_month; i++) {
             if (i < 10) {
                 var date_fmt = dateFormat(i, "onedigit");
             }
@@ -362,7 +362,7 @@ session_start();
         day_thead += '<td class="border-dark border-start border-end position-sticky top-0 bg-white"></td>';
         day_thead += '<td class="border-dark border-start border-end position-sticky top-0 bg-white"></td>';
         // load previous month ===============================================================================
-        for (var i = half_date_prev_month; i <= last_date_prev_month; i++) {
+        for (var i = week_prev_month; i <= last_date_prev_month; i++) {
             d = new Date(prev_year, prev_month, i).getDay();
             var day_fmt = dayFormat(d, "idx");
             day_thead += '<td class="text-dark border-top border-bottom border-start border-dark" style="background-color: '+day_fmt.color+';">';
@@ -386,7 +386,7 @@ session_start();
         //====================================================================================================
 
         // load next month ===================================================================================
-        for (var i = 1; i <= 15; i++) {
+        for (var i = 1; i <= last_date_next_month; i++) {
             d = new Date(next_year, next_month, i).getDay();
             var day_fmt = dayFormat(d, "idx");
             day_thead += '<td class="text-dark border-top border-bottom border-start border-dark" style="background-color: '+day_fmt.color+';">';
@@ -440,18 +440,18 @@ session_start();
             }
             
             if (item.en == EN_USER) {
-                user_column += '<td valign="middle" id="active-username" class="border-dark border-end position-sticky start-0" style="z-index: 0;">'+item.fullname+'</td>';
+                user_column += '<td valign="middle" id="active-username" class="border-dark border-start border-end position-sticky start-0" style="z-index: 0;">'+item.fullname+'</td>';
                 user_column += '<td valign="middle" id="active-team" class="border-dark border-start border-end" style="z-index: -1;">'+item.team+'</td>';
                 user_column += '<td valign="middle" id="active-nickname" class="border-dark border-start border-end" style="z-index: -1;">'+item.nickname+'</td>';
             }
             else if (item.en != EN_USER) {
-                user_column += '<td valign="middle" class="border-dark border-end position-sticky start-0 bg-white" style="z-index: 0;">'+item.fullname+'</td>';
+                user_column += '<td valign="middle" class="border-dark border-start border-end position-sticky start-0 bg-white" style="z-index: 0;">'+item.fullname+'</td>';
                 user_column += '<td valign="middle" class="border-dark border-start border-end" style="z-index: -1;">'+item.team+'</td>';
                 user_column += '<td valign="middle" class="border-dark border-start border-end" style="z-index: -1;">'+item.nickname+'</td>';
             }
 
             // load previous month ===============================================================================
-            for (var j = DATEsOBJECT.half_date_prev_month; j <= DATEsOBJECT.last_date_prev_month; j++) {
+            for (var j = DATEsOBJECT.week_prev_month; j <= DATEsOBJECT.last_date_prev_month; j++) {
                 var id_td = genID(DATEsOBJECT.prev_year, DATEsOBJECT.prev_month, j);
                 if (EN_USER == item.en || USERTYPE == "Admin") {
                     user_column += '<td valign="middle" id="'+item.en+':'+id_td+'" class="border-dark border-start booder-end" style="cursor: pointer;" onclick="optionPopUp(this)">none</td>';
@@ -475,7 +475,7 @@ session_start();
             //====================================================================================================
 
             // load next month ===================================================================================
-            for (var j = 1; j <= 15; j++) {
+            for (var j = 1; j <= DATEsOBJECT.last_date_next_month; j++) {
                 var id_td = genID(DATEsOBJECT.next_year, DATEsOBJECT.next_month, j);
                 if (EN_USER == item.en || USERTYPE == "Admin") {
                     user_column += '<td valign="middle" id="'+item.en+':'+id_td+'" class="border-dark border-start booder-end" style="cursor: pointer;" onclick="optionPopUp(this)">none</td>';
@@ -515,8 +515,9 @@ session_start();
             'api': 'load-user-plan',
             'month': month+1,
             'year': year,
-            'half_date': DATEsOBJECT.half_date_prev_month,
+            'week_prev_month': DATEsOBJECT.week_prev_month,
             'last_date': DATEsOBJECT.last_date_prev_month,
+            'last_date_next_month': DATEsOBJECT.last_date_next_month,
             'prev_month': DATEsOBJECT.prev_month+1,
             'next_month': DATEsOBJECT.next_month+1,
             'prev_year': DATEsOBJECT.prev_year,
@@ -582,7 +583,7 @@ session_start();
             result_column += '<td></td>';
             result_column += '<td></td>';
 
-            for (var i = DATEsOBJECT.half_date_prev_month; i <= DATEsOBJECT.last_date_prev_month; i++) {
+            for (var i = DATEsOBJECT.week_prev_month; i <= DATEsOBJECT.last_date_prev_month; i++) {
                 var id_td_ele = genID(DATEsOBJECT.prev_year, DATEsOBJECT.prev_month, i);
                 result_column += '<td class="border-dark border-start fw-semibold text-dark" id="sum'+options+':'+id_td_ele+'" style="background-color: '+bg+'">0</td>';
             }
@@ -592,7 +593,7 @@ session_start();
                 result_column += '<td class="border-dark border-start fw-semibold text-dark" id="sum'+options+':'+id_td_ele+'" style="background-color: '+bg+'">0</td>';
             }
 
-            for (var i = 1; i <= 15; i++) {
+            for (var i = 1; i <= DATEsOBJECT.last_date_next_month; i++) {
                 var id_td_ele = genID(DATEsOBJECT.next_year, DATEsOBJECT.next_month, i);
                 result_column += '<td class="border-dark border-start fw-semibold text-dark" id="sum'+options+':'+id_td_ele+'" style="background-color: '+bg+'">0</td>';
             }
@@ -606,8 +607,9 @@ session_start();
         var daily_count = requestHTTPS('api/backend.php', {
             'api': 'daily-result',
             'last_date_current_month': DATEsOBJECT.last_date_current_month,
-            'half_date_prev_month': DATEsOBJECT.half_date_prev_month,
+            'week_prev_month': DATEsOBJECT.week_prev_month,
             'last_date_prev_month': DATEsOBJECT.last_date_prev_month,
+            'last_date_next_month': DATEsOBJECT.last_date_next_month,
             'current_month': monthFormat(DATEsOBJECT.current_month, "idx").twodigit,
             'current_year': yearFormat(DATEsOBJECT.current_year, "fourdigit").fourdigit_string,
             'prev_month': monthFormat(DATEsOBJECT.prev_month, "idx").twodigit,
