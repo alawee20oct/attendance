@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (isset($_SESSION['daily_plan_en']) && isset($_SESSION['daily_plan'])) {
-    echo "<script>window.location.href = 'index.php'</script>";
+    session_destroy();
 }
 ?>
 
