@@ -105,36 +105,43 @@ session_start();
         </nav>
     </section>
 
-    <section class="mt-4 pt-5">
-        <div class="container">
-            <div class="text-center pb-3">
-                <h4 id="today-title"></h4>
+    <section class="mt-4 pt-5 container-fluid">
+        <div class="text-center">
+            <h4 id="today-title"></h4>
+        </div>
+        <div class="row text-center align-items-end justify-content-center">
+            <div class="col-lg-2">
+                <div class="card mx-auto border-0" style="width: 200px; height: 120px;">
+                    <img src="images/football.jpg" alt="football-image" class="card-img" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
             </div>
-            <div class="row text-center">
-                <div class="col-lg-3">
-                    <div class="border border-3 rounded-4 border-success py-1 shadow">
-                        <h5><i class="bi bi-sun-fill me-2"></i>DAY</h5>
-                        <h2 id="count_d"><div class="spinner-border text-success my-2" role="status"></div></h5>
-                    </div>
+            <div class="col-lg-2">
+                <div class="border border-3 rounded-4 border-success py-1 shadow">
+                    <h5><i class="bi bi-sun-fill me-2"></i>DAY</h5>
+                    <h2 id="count_d"><div class="spinner-border text-success my-2" role="status"></div></h5>
                 </div>
-                <div class="col-lg-3">
-                    <div class="border border-3 rounded-4 border-warning py-1 shadow">
-                        <h5><i class="bi bi-moon-fill me-2"></i>NIGHT</h5>
-                        <h2 id="count_n"><div class="spinner-border text-warning my-2" role="status"></div></h2>
-                    </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="border border-3 rounded-4 border-warning py-1 shadow">
+                    <h5><i class="bi bi-moon-fill me-2"></i>NIGHT</h5>
+                    <h2 id="count_n"><div class="spinner-border text-warning my-2" role="status"></div></h2>
                 </div>
-                <div class="col-lg-3">
-                    <div class="border border-3 rounded-4 border-secondary py-1 shadow">
-                        <h5><i class="bi bi-building-fill-x me-2"></i></i>OFF</h5>
-                        <h2 id="count_off"><div class="spinner-border text-secondary my-2" role="status"></div></h2>
-                    </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="border border-3 rounded-4 border-secondary py-1 shadow">
+                    <h5><i class="bi bi-building-fill-x me-2"></i></i>OFF</h5>
+                    <h2 id="count_off"><div class="spinner-border text-secondary my-2" role="status"></div></h2>
                 </div>
-                <div class="col-lg-3">
-                    <div class="border border-3 rounded-4 border-danger py-1 shadow">
-                        <div class="spinner-border text-danger my-3 visually-hidden" role="status"></div>
-                        <h5><i class="bi bi-person-fill-slash me-2"></i>LEAVE</h5>
-                        <h2 id="count_al"><div class="spinner-border text-danger my-2" role="status"></div></h2>
-                    </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="border border-3 rounded-4 border-danger py-1 shadow">
+                    <h5><i class="bi bi-person-fill-slash me-2"></i>LEAVE</h5>
+                    <h2 id="count_al"><div class="spinner-border text-danger my-2" role="status"></div></h2>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="card mx-auto border-0" style="width: 200px; height: 120px;">
+                    <img src="images/screw.jpg" alt="screw-image" class="card-img" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
             </div>
         </div>
@@ -154,7 +161,7 @@ session_start();
         </div>
     </div>
 
-    <div class="mt-2 px-4 py-4">
+    <div class="mt-2 px-4 py-4 container-fluid">
         <div class="table-responsive text-nowrap position-relative overflow-auto vh-100">
             <table class="table table-hover table-sm table-borderless w-auto" id="day-table">
                 <thead class="text-center border-dark border-top border-bottom sticky-top">
@@ -198,7 +205,7 @@ session_start();
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="">Checnge Password</h5>
+                    <h5 class="modal-title" id="">Change Password</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
