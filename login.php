@@ -24,8 +24,8 @@ if (isset($_SESSION['daily_plan_en']) && isset($_SESSION['daily_plan'])) {
 </head>
 <body class="bg-light">
     <div class="container mt-5">
-        <img src="images/icon.png" class="mx-auto d-block mb-3" alt="web-icon" width="80" height="80">
-        <h2 class="fw-semibold text-center">WELCOME</h2>
+        <img src="images/banner.jpg" class="mx-auto d-block mb-3 rounded-3" alt="web-banner" style="width: 60%;">
+        <h3 class="fw-semibold text-center">HSA Automation technician plan work</h3>
     </div>
     <div class="container text-center justify-content-center">
         <div class="form-signin m-auto pt-5 pb-5" style="width: 480px;">
