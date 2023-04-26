@@ -760,12 +760,7 @@ else if ($input['api'] == 'save-plan') {
 else if ($input['api'] == 'load-options') {
     $options = array();
     $i = 0;
-    if ($_SESSION['daily_plan_usertype'] == "Admin") {
-        $sql = mysqli_query($connect, "SELECT * FROM tb_options WHERE options != 'H' AND options != 'SD' ORDER BY id ASC");
-    }
-    else if ($_SESSION['daily_plan_usertype'] == "Tech") {
-        $sql = mysqli_query($connect, "SELECT * FROM tb_options WHERE options != 'H' AND options != 'SD' AND options != 'OFF' AND options != 'OT-D' AND options != 'OT-N' AND options != 'SET' ORDER BY id ASC");
-    }
+    $sql = mysqli_query($connect, "SELECT * FROM tb_options WHERE options != 'H' AND options != 'SD' ORDER BY id ASC");
     while ($row = mysqli_fetch_array($sql)) {
         $options[$i] = array(
             'options'=>$row['options'],
