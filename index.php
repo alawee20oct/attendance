@@ -660,7 +660,7 @@ session_start();
         if (ele.innerHTML != "none" && ele.innerHTML != "H" && ele.innerHTML != "SD") {
             var radio_btn = "option-" + ele.title;
             document.getElementById(radio_btn).checked = true;
-            if (ele.title == "SET") {
+            if (ele.style.backgroundColor == "#FFFFFF" || ele.style.backgroundColor == "rgb(255, 255, 255)") {
                 document.getElementById(radio_btn).style.backgroundColor = ele.style.color;
             }
             else {
@@ -689,10 +689,18 @@ session_start();
         var options = "";
         for (var i = 0; i < load_options.list_option.length; i++) {
             var item = load_options.list_option[i];
-            options += '<div class="py-1 px-2 mb-2 rounded-3 radio-box" style="border: 1px solid '+item.border_color+';">';
-                options += '<input type="radio" class="form-check-input me-2 mt-0" name="option-plan-radio" id="option-'+item.options+'" autocomplete="off" style="border-color: '+item.border_color+'; vertical-align: middle;" onclick="clickOption(this)">';
-                options += '<label class="badge border border-dark fs-4 py-1 px-2 '+item.font_weight+'" for="option-'+item.options+'" style="color: '+item.text_color+'; background-color: '+item.bg_color+'; vertical-align: middle;">'+item.inner_html+'</label>';
-            options += '</div>';
+            if ((item.options == "OFF" || item.options == "SET" || item.options == "OT-D" || item.options == "OT-N") && USERTYPE != "Admin") {
+                options += '<div class="py-1 px-2 mb-2 rounded-3 visually-hidden radio-box" style="border: 1px solid '+item.border_color+';">';
+                    options += '<input type="radio" class="form-check-input me-2 mt-0" name="option-plan-radio" id="option-'+item.options+'" autocomplete="off" style="border-color: '+item.border_color+'; vertical-align: middle;" onclick="clickOption(this)">';
+                    options += '<label class="badge border border-dark fs-4 py-1 px-2 '+item.font_weight+'" for="option-'+item.options+'" style="color: '+item.text_color+'; background-color: '+item.bg_color+'; vertical-align: middle;">'+item.inner_html+'</label>';
+                options += '</div>';
+            }
+            else {
+                options += '<div class="py-1 px-2 mb-2 rounded-3 radio-box" style="border: 1px solid '+item.border_color+';">';
+                    options += '<input type="radio" class="form-check-input me-2 mt-0" name="option-plan-radio" id="option-'+item.options+'" autocomplete="off" style="border-color: '+item.border_color+'; vertical-align: middle;" onclick="clickOption(this)">';
+                    options += '<label class="badge border border-dark fs-4 py-1 px-2 '+item.font_weight+'" for="option-'+item.options+'" style="color: '+item.text_color+'; background-color: '+item.bg_color+'; vertical-align: middle;">'+item.inner_html+'</label>';
+                options += '</div>';
+            }
         }
         document.getElementById("list-options").innerHTML = options;
     }
