@@ -127,7 +127,7 @@ session_start();
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="">Initial Plan</h5>
+                    <h5 class="modal-title" id="init_title">Initial Plan</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -273,12 +273,21 @@ session_start();
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="date" class="form-control" id="date-holiday">
+                    <div class="input-group">
+                        <input type="date" class="form-control" id="date-holiday">
+                        <button type="button" class="btn btn-primary" id="btn-holiday" onclick="holiday(1)">Save</button>
+                    </div>
                     <div class="alert alert-danger visually-hidden mt-3" role="alert" id="alert-holiday"></div>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-danger" id="btn-delete-holiday" onclick="holiday(2)">Delete</button>
-                    <button type="button" class="btn btn-primary" id="btn-holiday" onclick="holiday(1)">Save</button>
+                    <hr>
+                    <table class="table table-hover text-center">
+                        <thead>
+                            <th>yyyy/mm/dd</th>
+                            <th><i class="bi bi-trash3-fill"></i></th>
+                        </thead>
+                        <tbody id="list_holiday" class="table-group-divider">
+
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -292,12 +301,21 @@ session_start();
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="date" class="form-control" id="date-shutdown">
+                    <div class="input-group">
+                        <input type="date" class="form-control" id="date-shutdown">
+                        <button type="button" class="btn btn-primary" id="btn-shutdown" onclick="shutdown(1)">Save</button>
+                    </div>
                     <div class="alert alert-danger visually-hidden mt-3" role="alert" id="alert-shutdown"></div>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-danger" id="btn-delete-shutdown" onclick="shutdown(2)">Delete</button>
-                    <button type="button" class="btn btn-primary" id="btn-shutdown" onclick="shutdown(1)">Save</button>
+                    <hr>
+                    <table class="table table-hover text-center">
+                        <thead>
+                            <th>yyyy/mm/dd</th>
+                            <th><i class="bi bi-trash3-fill"></i></th>
+                        </thead>
+                        <tbody id="list_shutdown" class="table-group-divider">
+
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -550,6 +568,7 @@ session_start();
 
     function initPlan(btn) {
         if (typeof btn != "undefined") {
+            document.getElementById("init_title").innerHTML = 'Initial Plan Team : <b>'+btn.id.replace("INIT:", "")+'</b>';
             document.getElementById("hidden_team").value = btn.id.replace("INIT:", "");
             $('#init-plan-modal').modal('show');
         }
@@ -640,6 +659,18 @@ session_start();
 
     function holiday(option) {
         if (option == 0) {
+            var load_holiday = requestHTTPS('../api/backend.php', {
+                'api' : 'load-holiday'
+            }, true);
+            var tb_holiday = "";
+            for (var i = 0; i < load_holiday.holidays.length; i++) {
+                var item = load_holiday.holidays[i];
+                tb_holiday += '<tr>';
+                    tb_holiday += '<td valign="middle">'+item.date+'</td>';
+                    tb_holiday += '<td valign="middle"><button class="btn btn-danger btn-sm" id="'+item.date+'" onclick="holiday(this)">Delete</button></td>';
+                tb_holiday += '</tr>';
+            }
+            document.getElementById("list_holiday").innerHTML = tb_holiday;
             $('#holiday-modal').modal('show');
         }
         else if (option == 1) {
@@ -669,37 +700,38 @@ session_start();
                 }
             }
         }
-        else if (option == 2) {
-            var date = document.getElementById("date-holiday").value;
-            if (date == "") {
-                document.getElementById("alert-holiday").innerText = "Please Select Date";
+        else {
+            var date = option.id;
+            var delete_holiday = requestHTTPS('../api/backend.php', {
+                'api': 'delete-holiday',
+                'holiday': date,
+            }, true);
+            if (delete_holiday.result == false) {
+                document.getElementById("alert-holiday").innerText = delete_holiday.message;
                 document.getElementById("alert-holiday").classList.remove("visually-hidden");
                 document.getElementById("alert-holiday").classList.add("visually-visible");
                 return;
             }
-            else {
-                var delete_holiday = requestHTTPS('../api/backend.php', {
-                    'api': 'delete-holiday',
-                    'holiday': date,
-                }, true);
-                if (delete_holiday.result == false) {
-                    document.getElementById("alert-holiday").innerText = delete_holiday.message;
-                    document.getElementById("alert-holiday").classList.remove("visually-hidden");
-                    document.getElementById("alert-holiday").classList.add("visually-visible");
-                    return;
-                }
-                else if (delete_holiday.result == true) {
-                    document.getElementById("btn-delete-holiday").setAttribute("disabled", true);
-                    document.getElementById("date-holiday").setAttribute("disabled", true);
-                    document.getElementById("btn-delete-holiday").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
-                    location.reload();
-                }
+            else if (delete_holiday.result == true) {
+                location.reload();
             }
         }
     }
 
     function shutdown(option) {
         if (option == 0) {
+            var load_shutdown = requestHTTPS('../api/backend.php', {
+                'api' : 'load-shutdown'
+            }, true);
+            var tb_shutdown = "";
+            for (var i = 0; i < load_shutdown.list_shutdown.length; i++) {
+                var item = load_shutdown.list_shutdown[i];
+                tb_shutdown += '<tr>';
+                    tb_shutdown += '<td valign="middle">'+item.date_shutdown+'</td>';
+                    tb_shutdown += '<td valign="middle"><button class="btn btn-danger btn-sm" id="'+item.date_shutdown+'" onclick="shutdown(this)">Delete</button></td>';
+                tb_shutdown += '</tr>';
+            }
+            document.getElementById("list_shutdown").innerHTML = tb_shutdown;
             $('#shutdown-modal').modal('show');
         }
         else if (option == 1) {
@@ -729,31 +761,20 @@ session_start();
                 }
             }
         }
-        else if (option == 2) {
-            var date = document.getElementById("date-shutdown").value;
-            if (date == "") {
-                document.getElementById("alert-shutdown").innerText = "Please Select Date";
+        else {
+            var date = option.id;
+            var delete_shutdown = requestHTTPS('../api/backend.php', {
+                'api': 'delete-shutdown',
+                'shutdown': date,
+            }, true);
+            if (delete_shutdown.result == false) {
+                document.getElementById("alert-shutdown").innerText = delete_shutdown.message;
                 document.getElementById("alert-shutdown").classList.remove("visually-hidden");
                 document.getElementById("alert-shutdown").classList.add("visually-visible");
                 return;
             }
-            else {
-                var delete_shutdown = requestHTTPS('../api/backend.php', {
-                    'api': 'delete-shutdown',
-                    'shutdown': date,
-                }, true);
-                if (delete_shutdown.result == false) {
-                    document.getElementById("alert-shutdown").innerText = delete_shutdown.message;
-                    document.getElementById("alert-shutdown").classList.remove("visually-hidden");
-                    document.getElementById("alert-shutdown").classList.add("visually-visible");
-                    return;
-                }
-                else if (delete_shutdown.result == true) {
-                    document.getElementById("btn-delete-shutdown").setAttribute("disabled", true);
-                    document.getElementById("date-shutdown").setAttribute("disabled", true);
-                    document.getElementById("btn-delete-shutdown").innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Loading...';
-                    location.reload();
-                }
+            else if (delete_shutdown.result == true) {
+                location.reload();
             }
         }
     }
