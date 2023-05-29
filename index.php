@@ -237,9 +237,9 @@ session_start();
         var date = current.getDate();
         var day = current.getDay();
 
-        if (USERTYPE == "Admin") {
-            expandPlan(date, month, year);
-        }
+        // if (USERTYPE == "Admin") {
+        //     expandPlan(date, month, year);
+        // }
         renderInputMonthYear(current);
         renderTablePlan(month, year);
         loadShutdown();
