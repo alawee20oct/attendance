@@ -467,7 +467,7 @@ if ($input['api'] == "logout") {
 else if ($input['api'] == 'load-user') {
     $users = array();
     $i = 0;
-    $sql = mysqli_query($connect, "SELECT * FROM tb_user WHERE 1 ORDER BY team ASC, fullname ASC");
+    $sql = mysqli_query($connect, "SELECT en, fullname, nickname, team, usertype FROM tb_user WHERE 1 ORDER BY team ASC, fullname ASC");
     while ($row = mysqli_fetch_array($sql)) {
         $users[$i] = array(
             'en'=>$row['en'],
@@ -514,7 +514,8 @@ else if ($input['api'] == 'load-user-plan') {
     $k = 0;
 
     $sql_current = mysqli_query($connect, 
-        "SELECT * FROM tb_plan JOIN tb_options 
+        "SELECT en_user, datesave, tb_plan.options, date, month, year, text_color, bg_color, font_weight, inner_html
+        FROM tb_plan JOIN tb_options 
         ON tb_plan.options = tb_options.options
         AND tb_plan.month = '$month' 
         AND tb_plan.year = '$year' 
@@ -537,7 +538,8 @@ else if ($input['api'] == 'load-user-plan') {
     }
 
     $sql_previous = mysqli_query($connect, 
-        "SELECT * FROM tb_plan JOIN tb_options 
+        "SELECT en_user, datesave, tb_plan.options, date, month, year, text_color, bg_color, font_weight, inner_html
+        FROM tb_plan JOIN tb_options  
         ON tb_plan.options = tb_options.options
         AND tb_plan.year = '$prev_year' 
         AND tb_plan.month = '$prev_month' 
@@ -561,7 +563,8 @@ else if ($input['api'] == 'load-user-plan') {
     }
 
     $sql_next = mysqli_query($connect, 
-        "SELECT * FROM tb_plan JOIN tb_options 
+        "SELECT en_user, datesave, tb_plan.options, date, month, year, text_color, bg_color, font_weight, inner_html
+        FROM tb_plan JOIN tb_options 
         ON tb_plan.options = tb_options.options
         AND tb_plan.year = '$next_year' 
         AND tb_plan.month = '$next_month' 
@@ -613,38 +616,62 @@ else if ($input['api'] == 'daily-result') {
         else if ($i+1 >= 10) {
             $datesave = $current_year."-".$current_month."-".strval($i+1);
         }
-        $count_D = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'D'");
-        $count_N = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'N'");
-        $count_AL = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND (options = 'AL' OR options = '1st-AL' OR options = '2nd-AL')");
 
-        $result_D = mysqli_num_rows($count_D);
-        $result_N = mysqli_num_rows($count_N);
-        $result_AL = mysqli_num_rows($count_AL);
-
-        $result_current_month[$i] = array(
-            'result_D'=>$result_D,
-            'result_N'=>$result_N,
-            'result_AL'=>$result_AL,
-            'datesave'=>$datesave,
-        );
+        $sql_shutdown = mysqli_query($connect, "SELECT id FROM tb_dayoff WHERE date = '$datesave' AND options = 'SD'");
+        if (mysqli_num_rows($sql_shutdown) > 0) {
+            $result_current_month[$i] = array(
+                'result_D'=>0,
+                'result_N'=>0,
+                'result_AL'=>0,
+                'datesave'=>$datesave,
+            );
+        }
+        else {
+            $count_D = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'D'");
+            $count_N = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'N'");
+            $count_AL = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND (options = 'AL' OR options = '1st-AL' OR options = '2nd-AL')");
+    
+            $result_D = mysqli_num_rows($count_D);
+            $result_N = mysqli_num_rows($count_N);
+            $result_AL = mysqli_num_rows($count_AL);
+    
+            $result_current_month[$i] = array(
+                'result_D'=>$result_D,
+                'result_N'=>$result_N,
+                'result_AL'=>$result_AL,
+                'datesave'=>$datesave,
+            );
+        }
     }
 
     for ($i = $week_prev_month; $i <= $last_date_prev_month; $i++) {
         $datesave = $prev_year."-".$prev_month."-".strval($i);
-        $count_D = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'D'");
-        $count_N = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'N'");
-        $count_AL = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND (options = 'AL' OR options = '1st-AL' OR options = '2nd-AL')");
 
-        $result_D = mysqli_num_rows($count_D);
-        $result_N = mysqli_num_rows($count_N);
-        $result_AL = mysqli_num_rows($count_AL);
-
-        $result_previous_month[$i] = array(
-            'result_D'=>$result_D,
-            'result_N'=>$result_N,
-            'result_AL'=>$result_AL,
-            'datesave'=>$datesave,
-        );
+        $sql_shutdown = mysqli_query($connect, "SELECT id FROM tb_dayoff WHERE date = '$datesave' AND options = 'SD'");
+        if (mysqli_num_rows($sql_shutdown) > 0) {
+            $result_current_month[$i] = array(
+                'result_D'=>0,
+                'result_N'=>0,
+                'result_AL'=>0,
+                'datesave'=>$datesave,
+            );
+        }
+        else {
+            $count_D = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'D'");
+            $count_N = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'N'");
+            $count_AL = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND (options = 'AL' OR options = '1st-AL' OR options = '2nd-AL')");
+    
+            $result_D = mysqli_num_rows($count_D);
+            $result_N = mysqli_num_rows($count_N);
+            $result_AL = mysqli_num_rows($count_AL);
+    
+            $result_previous_month[$i] = array(
+                'result_D'=>$result_D,
+                'result_N'=>$result_N,
+                'result_AL'=>$result_AL,
+                'datesave'=>$datesave,
+            );
+        }
     }
 
     for ($i = 1; $i <= $last_date_next_month; $i++) {
@@ -654,20 +681,32 @@ else if ($input['api'] == 'daily-result') {
         else if ($i >= 10) {
             $datesave = $next_year."-".$next_month."-".strval($i);
         }
-        $count_D = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'D'");
-        $count_N = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'N'");
-        $count_AL = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND (options = 'AL' OR options = '1st-AL' OR options = '2nd-AL')");
 
-        $result_D = mysqli_num_rows($count_D);
-        $result_N = mysqli_num_rows($count_N);
-        $result_AL = mysqli_num_rows($count_AL);
-
-        $result_next_month[$i] = array(
-            'result_D'=>$result_D,
-            'result_N'=>$result_N,
-            'result_AL'=>$result_AL,
-            'datesave'=>$datesave,
-        );
+        $sql_shutdown = mysqli_query($connect, "SELECT id FROM tb_dayoff WHERE date = '$datesave' AND options = 'SD'");
+        if (mysqli_num_rows($sql_shutdown) > 0) {
+            $result_current_month[$i] = array(
+                'result_D'=>0,
+                'result_N'=>0,
+                'result_AL'=>0,
+                'datesave'=>$datesave,
+            );
+        }
+        else {
+            $count_D = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'D'");
+            $count_N = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND options = 'N'");
+            $count_AL = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$datesave' AND (options = 'AL' OR options = '1st-AL' OR options = '2nd-AL')");
+    
+            $result_D = mysqli_num_rows($count_D);
+            $result_N = mysqli_num_rows($count_N);
+            $result_AL = mysqli_num_rows($count_AL);
+    
+            $result_next_month[$i] = array(
+                'result_D'=>$result_D,
+                'result_N'=>$result_N,
+                'result_AL'=>$result_AL,
+                'datesave'=>$datesave,
+            );
+        }
     }
 
     $output['result_current_month'] = $result_current_month;
@@ -683,7 +722,8 @@ else if ($input['api'] == 'load-team-plan') {
     $i = 0;
 
     $sql_current = mysqli_query($connect, 
-        "SELECT * FROM tb_default_plan JOIN tb_options 
+        "SELECT team, date_plan, plan_option, date, month, year, text_color, bg_color, font_weight, inner_html
+        FROM tb_default_plan JOIN tb_options 
         ON tb_default_plan.plan_option = tb_options.options
         AND tb_default_plan.month = '$month' 
         AND tb_default_plan.year = '$year' 
@@ -711,10 +751,10 @@ else if ($input['api'] == 'load-team-plan') {
 else if ($input['api'] == 'count-user-today') {
     $today = $input['today'];
     $i = 0;
-    $sql_d = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$today' AND options = 'D'");
-    $sql_n = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$today' AND options = 'N'");
-    $sql_off = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$today' AND options = 'OFF'");
-    $sql_al = mysqli_query($connect, "SELECT * FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$today' AND (options = 'AL' OR options = '1st-AL' OR options = '2nd-AL')");
+    $sql_d = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$today' AND options = 'D'");
+    $sql_n = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$today' AND options = 'N'");
+    $sql_off = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$today' AND options = 'OFF'");
+    $sql_al = mysqli_query($connect, "SELECT en_user FROM tb_plan JOIN tb_user ON tb_plan.en_user = tb_user.en AND tb_user.usertype = 'Tech' AND datesave = '$today' AND (options = 'AL' OR options = '1st-AL' OR options = '2nd-AL')");
     
     $output = array(
         'today_d'=>mysqli_num_rows($sql_d),
@@ -729,7 +769,7 @@ else if ($input['api'] == 'save-plan') {
     $datesave = $input['datesave'];
     $options = $input['options'];
 
-    $sql = mysqli_query($connect, "SELECT * FROM tb_plan WHERE en_user = '$en_user' AND datesave = '$datesave'");
+    $sql = mysqli_query($connect, "SELECT en_user, datesave FROM tb_plan WHERE en_user = '$en_user' AND datesave = '$datesave'");
     if (mysqli_num_rows($sql) > 0) {
         $update = mysqli_query($connect, "UPDATE tb_plan SET options = '$options' WHERE en_user = '$en_user' AND datesave = '$datesave'");
         if ($update) {
@@ -784,8 +824,10 @@ else if ($input['api'] == 'init-plan') {
         $month = intval($date[5].$date[6]);
         $year = intval($date[0].$date[1].$date[2].$date[3]);
 
-        for ($i = 0; $i < 30; $i++) {
-            $dayoff = mysqli_query($connect, "SELECT * FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
+        // init plan for tech
+        $tech_loop = 18;
+        for ($i = 0; $i < $tech_loop; $i++) {
+            $dayoff = mysqli_query($connect, "SELECT id FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
             if (mysqli_num_rows($dayoff) == 0) {
                 $sql = mysqli_query($connect, "INSERT INTO tb_default_plan (team, date_plan, plan_option, date, month, year) VALUES ('$team', '$date', 'D', '$d', '$month', '$year')");
             }
@@ -798,7 +840,7 @@ else if ($input['api'] == 'init-plan') {
                 $d = intval($date[8].$date[9]);
                 $month = intval($date[5].$date[6]);
                 $year = intval($date[0].$date[1].$date[2].$date[3]);
-                $dayoff = mysqli_query($connect, "SELECT * FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
+                $dayoff = mysqli_query($connect, "SELECT id FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
                 if (mysqli_num_rows($dayoff) == 0) {
                     $sql = mysqli_query($connect, "INSERT INTO tb_default_plan (team, date_plan, plan_option, date, month, year) VALUES ('$team', '$date', 'D', '$d', '$month', '$year')");
                 }
@@ -812,7 +854,7 @@ else if ($input['api'] == 'init-plan') {
                 $d = intval($date[8].$date[9]);
                 $month = intval($date[5].$date[6]);
                 $year = intval($date[0].$date[1].$date[2].$date[3]);
-                $dayoff = mysqli_query($connect, "SELECT * FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
+                $dayoff = mysqli_query($connect, "SELECT id FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
                 if (mysqli_num_rows($dayoff) == 0) {
                     $sql = mysqli_query($connect, "INSERT INTO tb_default_plan (team, date_plan, plan_option, date, month, year) VALUES ('$team', '$date', 'OFF', '$d', '$month', '$year')");
                 }
@@ -826,7 +868,7 @@ else if ($input['api'] == 'init-plan') {
                 $d = intval($date[8].$date[9]);
                 $month = intval($date[5].$date[6]);
                 $year = intval($date[0].$date[1].$date[2].$date[3]);
-                $dayoff = mysqli_query($connect, "SELECT * FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
+                $dayoff = mysqli_query($connect, "SELECT id FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
                 if (mysqli_num_rows($dayoff) == 0) {
                     $sql = mysqli_query($connect, "INSERT INTO tb_default_plan (team, date_plan, plan_option, date, month, year) VALUES ('$team', '$date', 'N', '$d', '$month', '$year')");
                 }
@@ -840,7 +882,7 @@ else if ($input['api'] == 'init-plan') {
                 $d = intval($date[8].$date[9]);
                 $month = intval($date[5].$date[6]);
                 $year = intval($date[0].$date[1].$date[2].$date[3]);
-                $dayoff = mysqli_query($connect, "SELECT * FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
+                $dayoff = mysqli_query($connect, "SELECT id FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
                 if (mysqli_num_rows($dayoff) == 0) {
                     $sql = mysqli_query($connect, "INSERT INTO tb_default_plan (team, date_plan, plan_option, date, month, year) VALUES ('$team', '$date', 'OFF', '$d', '$month', '$year')");
                 }
@@ -865,7 +907,7 @@ else if ($input['api'] == 'init-plan') {
                 $d = $r['date'];
                 $m = $r['month'];
                 $y = $r['year'];
-                $plan = mysqli_query($connect, "SELECT * FROM tb_plan WHERE en_user = '$en' AND datesave = '$date_plan'");
+                $plan = mysqli_query($connect, "SELECT id FROM tb_plan WHERE en_user = '$en' AND datesave = '$date_plan'");
                 if (mysqli_num_rows($plan) > 0) {
                     $update = mysqli_query($connect, "UPDATE tb_plan SET options = '$plan_option' WHERE en_user = '$en' AND datesave = '$date_plan' AND options != 'H'");
                 }
@@ -875,7 +917,7 @@ else if ($input['api'] == 'init-plan') {
             }
         }
 
-        $holiday = mysqli_query($connect, "SELECT * FROM tb_dayoff WHERE options = 'H' ORDER BY date ASC");
+        $holiday = mysqli_query($connect, "SELECT id FROM tb_dayoff WHERE options = 'H' ORDER BY date ASC");
         while ($row = mysqli_fetch_array($holiday)) {
             $date_holiday = $row['date'];
             shiftHoliday($date_holiday, "user");
@@ -888,8 +930,10 @@ else if ($input['api'] == 'init-plan') {
         $month = intval($date[5].$date[6]);
         $year = intval($date[0].$date[1].$date[2].$date[3]);
 
-        for ($i = 0; $i < 52; $i++) {
-            $dayoff = mysqli_query($connect, "SELECT * FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
+        // init plan for office
+        $office_loop = 26;
+        for ($i = 0; $i < $office_loop; $i++) {
+            $dayoff = mysqli_query($connect, "SELECT id FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
             if (mysqli_num_rows($dayoff) == 0) {
                 $sql = mysqli_query($connect, "INSERT INTO tb_default_plan (team, date_plan, plan_option, date, month, year) VALUES ('$team', '$date', 'OFF', '$d', '$month', '$year')");
             }
@@ -902,7 +946,7 @@ else if ($input['api'] == 'init-plan') {
                 $d = intval($date[8].$date[9]);
                 $month = intval($date[5].$date[6]);
                 $year = intval($date[0].$date[1].$date[2].$date[3]);
-                $dayoff = mysqli_query($connect, "SELECT * FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
+                $dayoff = mysqli_query($connect, "SELECT id FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
                 if (mysqli_num_rows($dayoff) == 0) {
                     $sql = mysqli_query($connect, "INSERT INTO tb_default_plan (team, date_plan, plan_option, date, month, year) VALUES ('$team', '$date', 'D', '$d', '$month', '$year')");
                 }
@@ -915,7 +959,7 @@ else if ($input['api'] == 'init-plan') {
             $d = intval($date[8].$date[9]);
             $month = intval($date[5].$date[6]);
             $year = intval($date[0].$date[1].$date[2].$date[3]);
-            $dayoff = mysqli_query($connect, "SELECT * FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
+            $dayoff = mysqli_query($connect, "SELECT id FROM tb_default_plan WHERE date_plan = '$date' AND team = '$team'");
             if (mysqli_num_rows($dayoff) == 0) {
                 $sql = mysqli_query($connect, "INSERT INTO tb_default_plan (team, date_plan, plan_option, date, month, year) VALUES ('$team', '$date', 'OFF', '$d', '$month', '$year')");
             }
@@ -939,7 +983,7 @@ else if ($input['api'] == 'init-plan') {
                 $d = $r['date'];
                 $m = $r['month'];
                 $y = $r['year'];
-                $plan = mysqli_query($connect, "SELECT * FROM tb_plan WHERE en_user = '$en' AND datesave = '$date_plan'");
+                $plan = mysqli_query($connect, "SELECT id FROM tb_plan WHERE en_user = '$en' AND datesave = '$date_plan'");
                 if (mysqli_num_rows($plan) > 0) {
                     $update = mysqli_query($connect, "UPDATE tb_plan SET options = '$plan_option' WHERE en_user = '$en' AND datesave = '$date_plan' AND options != 'H'");
                 }
@@ -1008,28 +1052,35 @@ else if ($input['api'] == 'save-holiday') {
     }
 }
 
+else if ($input['api'] == 'load-holiday') {
+    $holidays = array();
+    $i = 0;
+    $sql = mysqli_query($connect, "SELECT * FROM tb_dayoff WHERE options = 'H'");
+    while ($row = mysqli_fetch_array($sql)) {
+        $holidays[$i] = array(
+            'date'=>$row['date'],
+        );
+        $i++;
+    }
+    $output['holidays'] = $holidays;
+}
+
 else if ($input['api'] == 'delete-holiday') {
     $date_holiday = $input['holiday'];
-    $holiday = mysqli_query($connect, "SELECT * FROM tb_dayoff WHERE date = '$date_holiday' AND options = 'H'");
-    if (mysqli_num_rows($holiday) == 0) {
-        $output = array('result'=>false, 'message'=>"Holiday Date not Found");
+    $sql = mysqli_query($connect, "DELETE FROM tb_dayoff WHERE date = '$date_holiday' AND options = 'H'");
+    if ($sql) {
+        dropHoliday($date_holiday, "user");
+        dropHoliday($date_holiday, "team");
+
+        $count = mysqli_query($connect, "SELECT * FROM tb_dayoff WHERE 1");
+        if (mysqli_num_rows($count) == 0) {
+            $reset = mysqli_query($connect, "ALTER TABLE tb_dayoff AUTO_INCREMENT = 1");
+        }
+
+        $output = array('result'=>true);
     }
-    else if (mysqli_num_rows($holiday) > 0) {
-        $sql = mysqli_query($connect, "DELETE FROM tb_dayoff WHERE date = '$date_holiday' AND options = 'H'");
-        if ($sql) {
-            dropHoliday($date_holiday, "user");
-            dropHoliday($date_holiday, "team");
-
-            $count = mysqli_query($connect, "SELECT * FROM tb_dayoff WHERE 1");
-            if (mysqli_num_rows($count) == 0) {
-                $reset = mysqli_query($connect, "ALTER TABLE tb_dayoff AUTO_INCREMENT = 1");
-            }
-
-            $output = array('result'=>true);
-        }
-        else {
-            $output = array('result'=>false, 'message'=>"Database Error : ".mysqli_error($connect));
-        }
+    else {
+        $output = array('result'=>false, 'message'=>"Database Error : ".mysqli_error($connect));
     }
 }
 
@@ -1108,19 +1159,14 @@ else if ($input['api'] == 'expand-plan') {
     $date = $input['date'];
 
     $check = mysqli_query($connect, "SELECT * FROM tb_update_plan WHERE status = 0");
-    if (mysqli_num_rows($check) == 0) {
-        $sql = mysqli_query($connect, "INSERT INTO tb_update_plan (date) VALUES ('2023-04-30')");
-    }
-    else {
-        $sql = mysqli_query($connect, "SELECT * FROM tb_update_plan WHERE date <= '$date' AND status = 0");
-        if (mysqli_num_rows($sql) > 0) {
-            expandPlan();
-    
-            $update_status = mysqli_query($connect, "UPDATE tb_update_plan SET status = 1 WHERE date <= '$date' AND status = 0");
-            
-            $next_date = date('Y-m-d', strtotime($date. " + 1 months"));
-            $new_update = mysqli_query($connect, "INSERT INTO tb_update_plan (date) VALUES ('$next_date')");
-        }
+    $sql = mysqli_query($connect, "SELECT * FROM tb_update_plan WHERE date <= '$date' AND status = 0");
+    if (mysqli_num_rows($sql) > 0) {
+        expandPlan();
+
+        $update_status = mysqli_query($connect, "UPDATE tb_update_plan SET status = 1 WHERE date <= '$date' AND status = 0");
+        
+        $next_date = date('Y-m-d', strtotime($date. " + 1 months"));
+        $new_update = mysqli_query($connect, "INSERT INTO tb_update_plan (date) VALUES ('$next_date')");
     }
 }
 
